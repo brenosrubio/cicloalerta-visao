@@ -1,0 +1,106 @@
+{
+  "classes": [
+    "buraco",
+    "rachadura"
+  ],
+  "mapa_rotulos": {
+    "D40": 0,
+    "D00": 1,
+    "D10": 1,
+    "D20": 1
+  },
+  "tamanho_bloco": 50,
+  "rotulos_originais": {
+    "D00": 2957,
+    "D10": 1385,
+    "D20": 3643,
+    "D40": 5325
+  },
+  "rotulos_ignorados": {},
+  "descartes": {},
+  "particoes": {
+    "train": {
+      "imagens": 5238,
+      "fundo": 528,
+      "buraco": 4136,
+      "rachadura": 6294
+    },
+    "val": {
+      "imagens": 756,
+      "fundo": 81,
+      "buraco": 611,
+      "rachadura": 910
+    },
+    "test": {
+      "imagens": 665,
+      "fundo": 57,
+      "buraco": 578,
+      "rachadura": 781
+    }
+  },
+  "por_pais": {
+    "Czech": {
+      "disponiveis": 1103,
+      "train": {
+        "imagens": 922,
+        "fundo": 96,
+        "buraco": 158,
+        "rachadura": 1204
+      },
+      "val": {
+        "imagens": 82,
+        "fundo": 9,
+        "buraco": 17,
+        "rachadura": 115
+      },
+      "test": {
+        "imagens": 99,
+        "fundo": 5,
+        "buraco": 12,
+        "rachadura": 130
+      }
+    },
+    "India": {
+      "disponiveis": 2778,
+      "train": {
+        "imagens": 2214,
+        "fundo": 221,
+        "buraco": 2284,
+        "rachadura": 2148
+      },
+      "val": {
+        "imagens": 291,
+        "fundo": 32,
+        "buraco": 303,
+        "rachadura": 273
+      },
+      "test": {
+        "imagens": 273,
+        "fundo": 25,
+        "buraco": 308,
+        "rachadura": 267
+      }
+    },
+    "Japan": {
+      "disponiveis": 2778,
+      "train": {
+        "imagens": 2102,
+        "fundo": 211,
+        "buraco": 1694,
+        "rachadura": 2942
+      },
+      "val": {
+        "imagens": 383,
+        "fundo": 40,
+        "buraco": 291,
+        "rachadura": 522
+      },
+      "test": {
+        "imagens": 293,
+        "fundo": 27,
+        "buraco": 258,
+        "rachadura": 384
+      }
+    }
+  }
+}

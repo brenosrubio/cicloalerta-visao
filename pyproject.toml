@@ -1,0 +1,9 @@
+[project]
+name = "via-atenta-visao"
+version = "1.0.0"
+description = "Detecção de buracos e rachaduras em tempo real com YOLO11 treinado sobre o RDD2022"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

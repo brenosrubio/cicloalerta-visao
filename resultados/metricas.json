@@ -1,0 +1,171 @@
+{
+  "ambiente": {
+    "python": "3.13.16",
+    "ultralytics": "8.4.200",
+    "torch": "2.11.0+cu130",
+    "gpu": "Tesla T4"
+  },
+  "configuracao": {
+    "paises": [
+      "India",
+      "Japan",
+      "Czech"
+    ],
+    "limite_por_pais": 2500,
+    "fracao_fundo": 0.1,
+    "epocas_maximas": 50,
+    "paciencia": 12,
+    "tamanho": 640,
+    "lote": 32,
+    "modelo_base": "yolo11n.pt",
+    "semente": 42
+  },
+  "treino": {
+    "tempo_min": 66.1,
+    "epocas_executadas": 50,
+    "melhor_epoca": 50
+  },
+  "limiares": {
+    "buraco": 0.277,
+    "rachadura": 0.198
+  },
+  "validacao": {
+    "geral": {
+      "precisao": 0.5498017488194065,
+      "revocacao": 0.4685644143090951,
+      "map50": 0.49563269731333437,
+      "map50_95": 0.21747914006731958
+    },
+    "por_classe": {
+      "buraco": {
+        "instancias": 611,
+        "precisao": 0.552448743512021,
+        "revocacao": 0.49427168576104746,
+        "ap50": 0.5026370173068718,
+        "ap50_95": 0.2118001352531175
+      },
+      "rachadura": {
+        "instancias": 910,
+        "precisao": 0.547154754126792,
+        "revocacao": 0.44285714285714284,
+        "ap50": 0.48862837731979686,
+        "ap50_95": 0.22315814488152155
+      }
+    }
+  },
+  "teste": {
+    "geral": {
+      "precisao": 0.5844751829060402,
+      "revocacao": 0.48431498079385404,
+      "map50": 0.5043241007293238,
+      "map50_95": 0.22050256092939113
+    },
+    "por_classe": {
+      "buraco": {
+        "instancias": 578,
+        "precisao": 0.5964308089517382,
+        "revocacao": 0.5,
+        "ap50": 0.5350811331996613,
+        "ap50_95": 0.23568229431506013,
+        "limiar": 0.277,
+        "precisao_no_limiar": 0.6313739660406806,
+        "revocacao_no_limiar": 0.47058823529411764
+      },
+      "rachadura": {
+        "instancias": 781,
+        "precisao": 0.5725195568603421,
+        "revocacao": 0.4686299615877081,
+        "ap50": 0.4735670682589863,
+        "ap50_95": 0.20532282754372214,
+        "limiar": 0.198,
+        "precisao_no_limiar": 0.5012100609173877,
+        "revocacao_no_limiar": 0.5032010243277849
+      }
+    },
+    "velocidade_ms": {
+      "preprocess": 2.1720023473714987,
+      "inference": 4.88855825412901,
+      "loss": 0.000612801503800591,
+      "postprocess": 1.5092894345907826
+    }
+  },
+  "por_pais": {
+    "Czech": {
+      "geral": {
+        "precisao": 0.3995823063593478,
+        "revocacao": 0.44358974358974357,
+        "map50": 0.3935410551549294,
+        "map50_95": 0.16207581659475184
+      },
+      "por_classe": {
+        "buraco": {
+          "instancias": 12,
+          "precisao": 0.3203214417333758,
+          "revocacao": 0.3333333333333333,
+          "ap50": 0.2764689512478711,
+          "ap50_95": 0.12863109829128688
+        },
+        "rachadura": {
+          "instancias": 130,
+          "precisao": 0.47884317098531987,
+          "revocacao": 0.5538461538461539,
+          "ap50": 0.5106131590619877,
+          "ap50_95": 0.19552053489821675
+        }
+      }
+    },
+    "India": {
+      "geral": {
+        "precisao": 0.5565751634778985,
+        "revocacao": 0.4653875197338361,
+        "map50": 0.46454829315623153,
+        "map50_95": 0.20239995563901697
+      },
+      "por_classe": {
+        "buraco": {
+          "instancias": 308,
+          "precisao": 0.514365499057157,
+          "revocacao": 0.4332965550017768,
+          "ap50": 0.4418620101806332,
+          "ap50_95": 0.1869325494754837
+        },
+        "rachadura": {
+          "instancias": 267,
+          "precisao": 0.59878482789864,
+          "revocacao": 0.49747848446589543,
+          "ap50": 0.48723457613182986,
+          "ap50_95": 0.21786736180255023
+        }
+      }
+    },
+    "Japan": {
+      "geral": {
+        "precisao": 0.6374511964127219,
+        "revocacao": 0.5131144790444824,
+        "map50": 0.556033533130394,
+        "map50_95": 0.2523151572582011
+      },
+      "por_classe": {
+        "buraco": {
+          "instancias": 258,
+          "precisao": 0.6898733084209312,
+          "revocacao": 0.6121664580889646,
+          "ap50": 0.6462776726856423,
+          "ap50_95": 0.2979394751670822
+        },
+        "rachadura": {
+          "instancias": 384,
+          "precisao": 0.5850290844045125,
+          "revocacao": 0.4140625,
+          "ap50": 0.4657893935751459,
+          "ap50_95": 0.20669083934931987
+        }
+      }
+    }
+  },
+  "onnx": {
+    "caixas_comparadas": 119,
+    "concordancia_com_pytorch": 1.0,
+    "latencia_cpu_colab_ms": 104.5
+  }
+}

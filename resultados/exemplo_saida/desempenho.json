@@ -1,0 +1,11 @@
+{
+  "quadros": 60,
+  "duracao_s": 4.08,
+  "fps_medio": 14.69,
+  "latencia_media_ms": 64.3,
+  "latencia_p95_ms": 72.9,
+  "ocorrencias": {
+    "rachadura": 56,
+    "buraco": 21
+  }
+}

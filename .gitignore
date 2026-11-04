@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Dados e saídas locais: a base é baixada pelo notebook e as saídas podem ter rostos e placas
+dados/
+saida/
+*.mp4
+!docs/demo/*.mp4
+
+# Segredos
+.env
+*.pem
