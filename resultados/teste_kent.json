@@ -1,0 +1,89 @@
+{
+  "base": "Kent (Data in Brief, 2023), 713 fotos de celular, licença CC BY 4.0",
+  "modelo": "cicloalerta.onnx",
+  "criterio": "classe buraco, IoU >= 0,5",
+  "grupos": {
+    "todas_as_fotos": {
+      "fotos": 713,
+      "buracos_marcados": 1153,
+      "ap50": 0.299,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.448,
+      "revocacao_no_limiar": 0.308,
+      "fotos_em_que_aponta_buraco": 0.654,
+      "fotos_em_que_aponta_algum_defeito": 0.731
+    },
+    "particao_teste": {
+      "fotos": 200,
+      "buracos_marcados": 295,
+      "ap50": 0.372,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.502,
+      "revocacao_no_limiar": 0.38,
+      "fotos_em_que_aponta_buraco": 0.715,
+      "fotos_em_que_aponta_algum_defeito": 0.775
+    },
+    "teste_com_agua": {
+      "fotos": 56,
+      "buracos_marcados": 107,
+      "ap50": 0.314,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.508,
+      "revocacao_no_limiar": 0.28,
+      "fotos_em_que_aponta_buraco": 0.607,
+      "fotos_em_que_aponta_algum_defeito": 0.643
+    },
+    "teste_seco": {
+      "fotos": 141,
+      "buracos_marcados": 185,
+      "ap50": 0.423,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.5,
+      "revocacao_no_limiar": 0.443,
+      "fotos_em_que_aponta_buraco": 0.773,
+      "fotos_em_que_aponta_algum_defeito": 0.837
+    }
+  },
+  "grupos_iou_30": {
+    "todas_as_fotos": {
+      "fotos": 713,
+      "buracos_marcados": 1153,
+      "ap50": 0.393,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.523,
+      "revocacao_no_limiar": 0.36,
+      "fotos_em_que_aponta_buraco": 0.654,
+      "fotos_em_que_aponta_algum_defeito": 0.731
+    },
+    "particao_teste": {
+      "fotos": 200,
+      "buracos_marcados": 295,
+      "ap50": 0.478,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.574,
+      "revocacao_no_limiar": 0.434,
+      "fotos_em_que_aponta_buraco": 0.715,
+      "fotos_em_que_aponta_algum_defeito": 0.775
+    },
+    "teste_com_agua": {
+      "fotos": 56,
+      "buracos_marcados": 107,
+      "ap50": 0.412,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.576,
+      "revocacao_no_limiar": 0.318,
+      "fotos_em_que_aponta_buraco": 0.607,
+      "fotos_em_que_aponta_algum_defeito": 0.643
+    },
+    "teste_seco": {
+      "fotos": 141,
+      "buracos_marcados": 185,
+      "ap50": 0.535,
+      "limiar": 0.277,
+      "precisao_no_limiar": 0.573,
+      "revocacao_no_limiar": 0.508,
+      "fotos_em_que_aponta_buraco": 0.773,
+      "fotos_em_que_aponta_algum_defeito": 0.837
+    }
+  }
+}

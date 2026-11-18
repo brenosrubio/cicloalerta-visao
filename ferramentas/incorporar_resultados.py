@@ -23,9 +23,9 @@ import numpy as np
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ))
 
-from via_atenta import detectar as app  # noqa: E402
-from via_atenta.detector import DetectorONNX  # noqa: E402
-from via_atenta.rastreador import iou  # noqa: E402
+from cicloalerta import detectar as app  # noqa: E402
+from cicloalerta.detector import DetectorONNX  # noqa: E402
+from cicloalerta.rastreador import iou  # noqa: E402
 
 IOU_ACERTO = 0.4
 INICIO_README = "<!-- RESULTADOS:INICIO -->"
@@ -196,7 +196,7 @@ def main() -> int:
                 shutil.copy2(item, destino / item.name)
 
     metricas = json.loads((destino / "metricas.json").read_text(encoding="utf-8"))
-    modelo = raiz / "modelos" / "via_atenta.onnx"
+    modelo = raiz / "modelos" / "cicloalerta.onnx"
     amostras = destino / "amostras_teste"
 
     analises = analisar_amostras(DetectorONNX(modelo), amostras)
@@ -217,7 +217,7 @@ def main() -> int:
 
     from gerar_relatorio import montar
 
-    print(json.dumps(montar(raiz, raiz / "docs" / "relatorio_via_atenta.pdf"), ensure_ascii=False))
+    print(json.dumps(montar(raiz, raiz / "docs" / "relatorio_cicloalerta.pdf"), ensure_ascii=False))
     print(f"Pronto. {len(analises)} amostras, {len(acertos)} acertos e {len(erros)} erros ilustrados.")
     return 0
 

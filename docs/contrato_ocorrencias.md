@@ -1,6 +1,6 @@
 # Contrato de integração do componente de visão
 
-Este é o que os outros componentes da Via Atenta (dados, automação, IA generativa, MVP) podem esperar da visão.
+Este é o que os outros componentes do CicloAlerta (dados, automação, IA generativa, MVP) podem esperar da visão.
 
 ## Ocorrências em arquivo
 
@@ -33,7 +33,7 @@ Exemplo:
   "quadros_observados": 3,
   "caixa_normalizada": [0.31, 0.62, 0.48, 0.78],
   "fonte": "rua.mp4",
-  "modelo": "via_atenta",
+  "modelo": "cicloalerta",
   "status": "pendente_revisao",
   "latitude": null,
   "longitude": null,
@@ -48,7 +48,7 @@ A confiança mede o quanto o modelo acredita que aquilo é um defeito. Ela não 
 ## API HTTP
 
 ```bash
-python -m via_atenta.api --modelo modelos/via_atenta.onnx --porta 8000
+python -m cicloalerta.api --modelo modelos/cicloalerta.onnx --porta 8000
 ```
 
 `GET /saude` responde com as classes do modelo:
@@ -57,27 +57,35 @@ python -m via_atenta.api --modelo modelos/via_atenta.onnx --porta 8000
 {"status": "ok", "classes": ["buraco", "rachadura"]}
 ```
 
-`POST /v1/deteccoes` recebe `multipart/form-data` com o arquivo no campo `imagem`, até 8 MB:
+`POST /api/detectar` é a rota combinada no contrato do MVP. Ela recebe `multipart/form-data` com a foto no campo `imagem` (o campo `foto` também é aceito), até 8 MB. A rota antiga, `POST /v1/deteccoes`, faz exatamente o mesmo.
 
 ```json
 {
   "largura": 1280,
-  "altura": 720,
+  "altura": 960,
   "tempo_ms": 54.2,
   "status": "pendente_revisao",
+  "tem_defeito": true,
   "deteccoes": [
-    {"classe": "buraco", "confianca": 0.81, "caixa": [402.0, 446.5, 611.3, 560.0]}
+    {"classe": "buraco", "confianca": 0.41, "caixa": [402.0, 446.5, 611.3, 560.0], "severidade_sugerida": "media"}
   ]
 }
 ```
 
-A `caixa` é `[x1, y1, x2, y2]` em pixels da imagem enviada. A imagem não é gravada.
+- `caixa` é `[x1, y1, x2, y2]` em pixels da foto enviada.
+- As detecções já passaram pelos limiares calibrados na validação (0,28 para buraco e 0,20 para rachadura). O site não deve aplicar outro corte, como 0,5: o modelo raramente passa disso e quase nenhum relato seria criado.
+- `severidade_sugerida` vem de uma regra provisória pelo tamanho da caixa na foto. Buraco que ocupa 4% da foto ou mais é `alta`, e o resto é `media`. Rachadura que ocupa 10% ou mais é `media`, e o resto é `baixa`. A regra não foi validada e a revisão humana confirma.
+- A foto não é gravada. Se o site guardar a foto, ele precisa apagar os metadados (EXIF) antes, porque eles podem ter a localização e o aparelho de quem tirou.
 
 | Código | Quando |
 |---|---|
-| 200 | Imagem processada, mesmo sem defeito |
-| 400 | Campo `imagem` ausente |
+| 200 | Foto processada, mesmo sem defeito (`tem_defeito: false`) |
+| 400 | Nenhum arquivo nos campos `imagem` ou `foto` |
 | 413 | Arquivo maior que 8 MB |
 | 415 | O arquivo não é uma imagem válida |
 
-A API não tem autenticação e sobe em `127.0.0.1`. Para expor na internet, ela precisa ficar atrás de um gateway com autenticação.
+A API não tem autenticação e sobe em `127.0.0.1`. Para expor na internet, ela precisa ficar atrás do servidor do site ou de um gateway com autenticação.
+
+## Integração com o site
+
+O passo a passo para quem cuida da API do site está em [integracao_site.md](integracao_site.md).

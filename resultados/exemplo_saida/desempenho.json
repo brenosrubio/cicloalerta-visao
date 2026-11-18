@@ -1,9 +1,9 @@
 {
   "quadros": 60,
-  "duracao_s": 4.08,
-  "fps_medio": 14.69,
-  "latencia_media_ms": 64.3,
-  "latencia_p95_ms": 72.9,
+  "duracao_s": 4.3,
+  "fps_medio": 13.95,
+  "latencia_media_ms": 67.6,
+  "latencia_p95_ms": 78.4,
   "ocorrencias": {
     "rachadura": 56,
     "buraco": 21

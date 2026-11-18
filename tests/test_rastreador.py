@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from via_atenta.detector import Deteccao
-from via_atenta.rastreador import RastreadorIoU, iou
+from cicloalerta.detector import Deteccao
+from cicloalerta.rastreador import RastreadorIoU, iou
 
 
 def deteccao(caixa=(100, 100, 200, 200), classe_id=0, confianca=0.8):

@@ -170,7 +170,7 @@ def urlopen_falso(espelhos: dict):
 def main() -> int:
     onnx = Path(sys.argv[1]).resolve()
     os.environ["ENSAIO_ONNX"] = str(onnx)
-    caderno = json.loads((RAIZ_REPO / "notebooks" / "treino_via_atenta_colab.ipynb").read_text(encoding="utf-8"))
+    caderno = json.loads((RAIZ_REPO / "notebooks" / "treino_cicloalerta_colab.ipynb").read_text(encoding="utf-8"))
     instalar_stubs()
 
     with tempfile.TemporaryDirectory() as temporario:
@@ -209,14 +209,14 @@ def main() -> int:
                 exec(compile(fonte, f"celula_{numero}", "exec"), ambiente)
             print(f"célula {numero}/{len(codigos)} ok")
 
-        final = area / "via_atenta" / "resultados.zip"
+        final = area / "cicloalerta" / "resultados.zip"
         with zipfile.ZipFile(final) as pacote:
             nomes = pacote.namelist()
             metricas = json.loads(pacote.read("metricas.json"))
         for esperado in (
             "metricas.json",
             "estatisticas_dados.json",
-            "modelos/via_atenta.onnx",
+            "modelos/cicloalerta.onnx",
             "modelos/best.pt",
             "modelos/limiares.json",
             "treino/results.csv",

@@ -6,8 +6,8 @@ import cv2
 import numpy as np
 import pytest
 
-from via_atenta.api import TAMANHO_MAXIMO, criar_app
-from via_atenta.detector import Deteccao
+from cicloalerta.api import TAMANHO_MAXIMO, analisar_imagem, criar_app, severidade_sugerida
+from cicloalerta.detector import Deteccao
 
 
 class DetectorFalso:
@@ -49,7 +49,10 @@ def test_detecta_em_imagem_valida(cliente, detector):
     corpo = resposta.get_json()
     assert (corpo["largura"], corpo["altura"]) == (64, 48)
     assert corpo["status"] == "pendente_revisao"
-    assert corpo["deteccoes"] == [{"classe": "buraco", "confianca": 0.812, "caixa": [10.0, 20.0, 30.0, 40.0]}]
+    assert corpo["tem_defeito"] is True
+    assert corpo["deteccoes"] == [
+        {"classe": "buraco", "confianca": 0.812, "caixa": [10.0, 20.0, 30.0, 40.0], "severidade_sugerida": "alta"}
+    ]
     assert detector.quadros[0].shape == (48, 64, 3)
 
 
@@ -72,3 +75,36 @@ def test_imagem_grande_demais(cliente):
     resposta = cliente.post("/v1/deteccoes", data={"imagem": (io.BytesIO(b"0" * (TAMANHO_MAXIMO + 1)), "x.jpg")})
     assert resposta.status_code == 413
     assert "8 MB" in resposta.get_json()["erro"]
+
+
+def test_rota_do_contrato_do_mvp_aceita_campo_foto(cliente):
+    resposta = cliente.post("/api/detectar", data={"foto": (io.BytesIO(jpeg()), "buraco.jpg")})
+    assert resposta.status_code == 200
+    assert resposta.get_json()["deteccoes"][0]["classe"] == "buraco"
+
+
+def test_rota_do_contrato_sem_arquivo(cliente):
+    assert cliente.post("/api/detectar").status_code == 400
+
+
+def test_analisar_imagem_sem_flask(detector):
+    corpo, codigo = analisar_imagem(jpeg(), detector)
+    assert codigo == 200 and corpo["status"] == "pendente_revisao"
+    corpo, codigo = analisar_imagem(b"nao sou imagem", detector)
+    assert codigo == 415
+
+
+def test_foto_sem_defeito():
+    class Vazio(DetectorFalso):
+        def detectar(self, quadro):
+            return []
+
+    corpo, codigo = analisar_imagem(jpeg(), Vazio())
+    assert codigo == 200 and corpo["tem_defeito"] is False and corpo["deteccoes"] == []
+
+
+def test_severidade_sugerida_pelo_tamanho_da_caixa():
+    assert severidade_sugerida("buraco", 0.10) == "alta"
+    assert severidade_sugerida("buraco", 0.01) == "media"
+    assert severidade_sugerida("rachadura", 0.20) == "media"
+    assert severidade_sugerida("rachadura", 0.02) == "baixa"

@@ -1,0 +1,59 @@
+{
+  "descricao": "Vídeo gravado pela equipe numa ciclovia de São Paulo com o celular preso ao guidão, 39 s, convertido de 60 para 15 quadros por segundo",
+  "comando": "python -m cicloalerta.detectar --fonte ciclovia.mp4 --ignorar-base 0.3",
+  "quadros": 593,
+  "fps_medio_cpu_2_nucleos": 14.37,
+  "ocorrencias_com_ignorar_base": {
+    "rachadura": 35,
+    "buraco": 0
+  },
+  "ocorrencias_sem_ignorar_base": {
+    "rachadura": 35,
+    "buraco": 1
+  },
+  "maior_confianca_rachadura": 0.747,
+  "guidao_como_buraco_confianca": 0.521,
+  "foto_reportar": {
+    "arquivo": "foto da ciclovia sem o guidão, 1200x1000",
+    "tem_defeito": true,
+    "deteccoes": [
+      {
+        "classe": "buraco",
+        "confianca": 0.463
+      },
+      {
+        "classe": "rachadura",
+        "confianca": 0.371
+      }
+    ]
+  },
+  "observacao": "Avaliação qualitativa, sem marcação humana: a pintura rachada foi marcada como rachadura; várias outras ocorrências são linhas transversais do piso, que podem ser trincas ou juntas; o guidão virou buraco até ser descartado com --ignorar-base.",
+  "nao_registrados": [
+    {
+      "tempo_s": 1.9,
+      "descricao": "borda quebrada entre a faixa vermelha e o concreto",
+      "maior_confianca_buraco": 0.46,
+      "quadros_acima_do_limiar": 2
+    },
+    {
+      "tempo_s": 38.0,
+      "descricao": "vão que atravessa a ciclovia na travessia",
+      "maior_confianca_buraco": 0.19,
+      "quadros_acima_do_limiar": 0
+    }
+  ],
+  "teste_limiar_buraco": {
+    "limiar_calibrado": 0.277,
+    "limiar_testado": 0.15,
+    "buracos_registrados_na_ciclovia": {
+      "0.277": 0,
+      "0.15": 3
+    },
+    "na_ciclovia_com_0_15": "a borda quebrada (acerto), o guidão e o painel (erros)",
+    "buracos_registrados_em_outros_4_videos_da_equipe": {
+      "0.277": 28,
+      "0.15": 69
+    },
+    "decisao": "manter o limiar calibrado"
+  }
+}

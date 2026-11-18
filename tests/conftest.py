@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import pytest
 
-ATIVOS = Path(os.environ.get("VIA_ATIVOS", "tests/ativos"))
+ATIVOS = Path(os.environ.get("CICLOALERTA_ATIVOS", "tests/ativos"))
 
 
 class SessaoFalsa:
@@ -37,7 +37,7 @@ def sessao_falsa():
 def modelo_real() -> Path:
     caminho = ATIVOS / "yolo11n.onnx"
     if not caminho.exists():
-        pytest.skip("yolo11n.onnx ausente; defina VIA_ATIVOS para rodar este teste")
+        pytest.skip("yolo11n.onnx ausente; defina CICLOALERTA_ATIVOS para rodar este teste")
     return caminho
 
 
@@ -45,7 +45,7 @@ def modelo_real() -> Path:
 def coco128() -> Path:
     caminho = ATIVOS / "coco128"
     if not caminho.exists():
-        pytest.skip("coco128 ausente; defina VIA_ATIVOS para rodar este teste")
+        pytest.skip("coco128 ausente; defina CICLOALERTA_ATIVOS para rodar este teste")
     return caminho
 
 

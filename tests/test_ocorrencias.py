@@ -5,8 +5,8 @@ import json
 import cv2
 import numpy as np
 
-from via_atenta.ocorrencias import RegistroOcorrencias, recortar
-from via_atenta.rastreador import Rastro
+from cicloalerta.ocorrencias import RegistroOcorrencias, recortar
+from cicloalerta.rastreador import Rastro
 
 
 def rastro(caixa=(100, 50, 300, 250)):
@@ -27,7 +27,7 @@ QUADRO = np.zeros((400, 800, 3), dtype=np.uint8)
 
 
 def test_registra_no_formato_do_contrato(tmp_path):
-    registro = RegistroOcorrencias(tmp_path, "camera-0", "via_atenta", latitude=-23.55, longitude=-46.63)
+    registro = RegistroOcorrencias(tmp_path, "camera-0", "cicloalerta", latitude=-23.55, longitude=-46.63)
     registro.registrar(rastro(), QUADRO)
     linha = json.loads((tmp_path / "ocorrencias.jsonl").read_text(encoding="utf-8"))
     assert linha["classe"] == "buraco"

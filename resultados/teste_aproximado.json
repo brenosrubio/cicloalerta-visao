@@ -1,0 +1,45 @@
+{
+  "descricao": "Defeitos marcados encontrados pelo modelo (mesma classe, IoU >= 0,3) nas 60 amostras do teste, na foto inteira e em recortes quadrados em volta de cada marcação",
+  "lado_do_recorte": {
+    "recorte_medio": "4 vezes o lado maior da caixa",
+    "recorte_perto": "2,5 vezes o lado maior da caixa"
+  },
+  "resultados": {
+    "foto_inteira": {
+      "buraco": {
+        "encontrados": 18,
+        "total": 51,
+        "taxa": 0.353
+      },
+      "rachadura": {
+        "encontrados": 34,
+        "total": 63,
+        "taxa": 0.54
+      }
+    },
+    "recorte_medio": {
+      "buraco": {
+        "encontrados": 17,
+        "total": 51,
+        "taxa": 0.333
+      },
+      "rachadura": {
+        "encontrados": 27,
+        "total": 63,
+        "taxa": 0.429
+      }
+    },
+    "recorte_perto": {
+      "buraco": {
+        "encontrados": 12,
+        "total": 51,
+        "taxa": 0.235
+      },
+      "rachadura": {
+        "encontrados": 19,
+        "total": 63,
+        "taxa": 0.302
+      }
+    }
+  }
+}

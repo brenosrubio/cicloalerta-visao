@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera o notebook do Colab embutindo o mesmo código testado em via_atenta/.
+"""Gera o notebook do Colab embutindo o mesmo código testado em cicloalerta/.
 
 Assim existe uma só versão do preparo de dados e do detector. Rode de novo sempre
 que um desses arquivos mudar.
@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
-SAIDA = RAIZ / "notebooks" / "treino_via_atenta_colab.ipynb"
+SAIDA = RAIZ / "notebooks" / "treino_cicloalerta_colab.ipynb"
 VERSAO_ULTRALYTICS = "8.4.200"
 
 
@@ -29,21 +29,21 @@ def codigo(texto: str) -> dict:
 
 
 def embutir(arquivo: str) -> dict:
-    conteudo = (RAIZ / "via_atenta" / arquivo).read_text(encoding="utf-8")
+    conteudo = (RAIZ / "cicloalerta" / arquivo).read_text(encoding="utf-8")
     return codigo(f"%%writefile {arquivo}\n{conteudo}")
 
 
 CELULAS = [
     markdown(
         """
-# Via Atenta: treino do detector de buracos e rachaduras
+# CicloAlerta: treino do detector de buracos e rachaduras
 
 Este notebook treina o YOLO11n com a base pública RDD2022, avalia o modelo em imagens
 que ele nunca viu e gera o arquivo `resultados.zip`.
 
 **Como usar:** menu **Ambiente de execução > Executar tudo**. Mantenha a aba aberta até o
 fim. No final, o `resultados.zip` é baixado sozinho. Se o download não começar, abra o
-ícone de pasta na lateral, procure `via_atenta/resultados.zip` e baixe por lá.
+ícone de pasta na lateral, procure `cicloalerta/resultados.zip` e baixe por lá.
 
 O notebook já pede GPU T4. Se a primeira célula acusar falta de GPU, vá em
 **Ambiente de execução > Alterar o tipo de ambiente de execução > GPU T4** e rode de novo.
@@ -85,7 +85,7 @@ LOTE = 32
 MODELO_BASE = "yolo11n.pt"            # pré-treinado no COCO, ponto de partida do fine-tuning
 SEMENTE = 42
 
-RAIZ = Path.cwd() / "via_atenta"
+RAIZ = Path.cwd() / "cicloalerta"
 ORIGEM = RAIZ / "rdd2022"
 DESTINO = RAIZ / "via_yolo"
 EXECUCOES = RAIZ / "execucoes"
@@ -93,7 +93,7 @@ ORIGEM.mkdir(parents=True, exist_ok=True)
 EXECUCOES.mkdir(parents=True, exist_ok=True)
 """
     ),
-    markdown("## 3. Código do projeto\n\nOs dois arquivos abaixo são cópias de `via_atenta/` no repositório."),
+    markdown("## 3. Código do projeto\n\nOs dois arquivos abaixo são cópias de `cicloalerta/` no repositório."),
     embutir("preparar_dados.py"),
     embutir("detector.py"),
     markdown(
@@ -372,7 +372,7 @@ for pais, dados in por_pais.items():
 import detector as detector_onnx
 
 caminho_onnx = Path(avaliador.export(format="onnx", imgsz=TAMANHO, opset=17, simplify=True, dynamic=False))
-onnx_final = RAIZ / "via_atenta.onnx"
+onnx_final = RAIZ / "cicloalerta.onnx"
 shutil.copy2(caminho_onnx, onnx_final)
 
 detector_app = detector_onnx.DetectorONNX(onnx_final, limiares=limiares)
@@ -424,7 +424,7 @@ pacote = RAIZ / "pacote"
 if pacote.exists():
     shutil.rmtree(pacote)
 (pacote / "modelos").mkdir(parents=True)
-shutil.copy2(onnx_final, pacote / "modelos" / "via_atenta.onnx")
+shutil.copy2(onnx_final, pacote / "modelos" / "cicloalerta.onnx")
 shutil.copy2(melhor_pesos, pacote / "modelos" / "best.pt")
 (pacote / "modelos" / "limiares.json").write_text(json.dumps(limiares, indent=2), encoding="utf-8")
 shutil.copy2(DESTINO / "estatisticas.json", pacote / "estatisticas_dados.json")

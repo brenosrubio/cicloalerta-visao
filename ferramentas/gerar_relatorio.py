@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera docs/relatorio_via_atenta.pdf na ordem pedida pela disciplina.
+"""Gera docs/relatorio_cicloalerta.pdf na ordem pedida pela disciplina.
 
 Todos os números vêm de resultados/metricas.json. Sem esse arquivo, sai um rascunho
 com as lacunas marcadas, nunca com valores inventados. O script para com erro se o
@@ -125,6 +125,7 @@ class Dados:
     """Lê os resultados e entrega cada número pronto para o texto."""
 
     def __init__(self, raiz: Path) -> None:
+        self.raiz = raiz
         pasta = raiz / "resultados"
         arquivo = pasta / "metricas.json"
         self.pasta = pasta
@@ -158,46 +159,49 @@ class Dados:
 
 def resumo(d: Dados) -> str:
     return (
-        "Quem anda por São Paulo conhece o problema: muitas vezes o buraco só entra na fila de conserto depois que alguém reclama. "
-        "No primeiro semestre de 2026, a prefeitura recebeu quase 52 mil pedidos de tapa-buraco, e 38% deles ainda "
-        "estavam abertos no começo de agosto. A Via Atenta propõe usar uma câmera comum, como a de um celular preso ao "
-        "painel, para reconhecer defeitos na via enquanto o veículo circula. Este trabalho entrega o componente de "
-        f"visão do produto. Fizemos o ajuste fino de um YOLO11n, pré-treinado no COCO, com {d.n_imagens} imagens reais "
-        "de ruas da Índia, do Japão e da República Tcheca, vindas da base pública RDD2022. As quatro categorias "
-        "originais viraram duas classes, buraco e rachadura, porque é essa diferença que pesa na triagem dos reparos. "
-        "A divisão entre treino, validação e teste foi feita por blocos de imagens vizinhas, para que quadros "
-        f"quase iguais não vazassem para o teste. No teste, o modelo alcançou mAP50 de {d.mapa50()}, com AP50 de "
-        f"{d.ap50('buraco')} para buracos e {d.ap50('rachadura')} para rachaduras. Exportado para ONNX, rodou a "
-        f"{d.fps()} quadros por segundo em CPU, sem placa de vídeo. Um rastreador simples junta as aparições do mesmo "
-        "defeito e descarta ruído de um quadro só. Cada defeito confirmado vira uma ocorrência em JSON, pendente de "
-        "revisão humana, e só o recorte do pavimento é guardado. A principal limitação é que a base não tem imagens "
-        "brasileiras, então o desempenho nas nossas ruas ainda precisa ser medido."
+        "Ciclistas e entregadores de São Paulo dividem as ciclovias com buracos e desníveis que causam quedas, e na "
+        "chuva esses defeitos ficam escondidos pela água. Em 2025, uma auditoria cidadã percorreu 715 dos 736 "
+        "quilômetros da rede cicloviária e classificou o pavimento de 20,5% dos trechos como precário, ruim ou "
+        "razoável. O CicloAlerta é um site que vai mostrar esses perigos num mapa, e este trabalho entrega o seu "
+        "componente de visão: um detector que confirma o defeito na foto enviada pelo ciclista e que roda em "
+        "tempo real sobre o vídeo de uma câmera comum. Fizemos o ajuste fino de um YOLO11n, pré-treinado no COCO, com "
+        f"{d.n_imagens} imagens reais de ruas da Índia, do Japão e da República Tcheca, vindas da base pública RDD2022. "
+        "As quatro categorias originais viraram duas classes, buraco e rachadura. A divisão dos dados evitou "
+        "vazamento entre imagens vizinhas. No teste, o modelo alcançou mAP50 de "
+        f"{d.mapa50()}, com AP50 de {d.ap50('buraco')} para buracos e {d.ap50('rachadura')} para rachaduras. "
+        f"Exportado para ONNX, rodou a {d.fps()} quadros por segundo em CPU, sem placa de vídeo. Cada defeito vira um "
+        "registro pendente de revisão humana. A principal limitação é a origem "
+        "das imagens: não encontramos base pública com fotos de ciclovias, e a RDD2022 não tem ruas brasileiras. Num "
+        "vídeo gravado pela equipe numa ciclovia paulistana, o modelo marcou a pintura trincada. Em "
+        "fotos de celular de outra base pública, o modelo foi pior nos buracos cheios de água do que nos secos, o que "
+        "orienta o próximo treino."
     )
 
 
 OBJETIVO = (
-    "Treinar uma arquitetura YOLO11 com imagens reais de vias para detectar buracos e rachaduras em tempo real, em "
-    "câmera comum e sem placa de vídeo, e entregar cada defeito confirmado como dado estruturado para a revisão humana "
-    "e para os demais componentes da Via Atenta."
+    "Treinar uma arquitetura YOLO11 com imagens reais de vias para detectar buracos e rachaduras em fotos e em vídeo, "
+    "em tempo real e sem placa de vídeo, e entregar cada defeito como dado estruturado para a revisão humana e o mapa "
+    "do CicloAlerta."
 )
 
 INTRODUCAO = [
-    "A Via Atenta foi pensada para quem depende das vias urbanas todos os dias: motociclistas, ciclistas, passageiros "
-    "de ônibus e pedestres com mobilidade reduzida, além das equipes de zeladoria que consertam o pavimento. Para "
-    "essas pessoas, um buraco significa risco de queda, atraso e gasto com manutenção.",
-    "Os números dão o tamanho da fila. Em São Paulo, a prefeitura recebeu quase 52 mil pedidos de tapa-buraco no "
-    "primeiro semestre de 2026. No começo de agosto, 38% deles continuavam sem solução, embora a Secretaria Municipal "
-    "de Subprefeituras informe tempo médio de atendimento de seis dias (BNEWS, 2026). Nas rodovias, a Pesquisa CNT de "
-    "2025 avaliou mais de 114 mil quilômetros e classificou 62% da malha como regular, ruim ou péssima. O mesmo estudo "
-    "calcula que o pavimento ruim encarece o transporte rodoviário em 31%, em média (PORTAL DO TRÂNSITO, 2025).",
-    "O conserto costuma começar com uma pessoa que vê o defeito, abre um pedido e descreve o lugar. Assim, a fila "
-    "depende de quem tem tempo para reclamar, e a prefeitura só fica sabendo do defeito quando alguém decide "
-    "registrá-lo.",
-    "Nossa proposta é usar câmeras que já existem para reconhecer o defeito enquanto o veículo circula. Este documento "
-    "trata do componente de visão do produto, que corresponde à disciplina de Applied Computer Vision: um detector "
-    "treinado com imagens reais, que roda em tempo real e entrega dados estruturados aos outros componentes.",
-    "O projeto se conecta à ODS 11 (cidades e comunidades sustentáveis), porque ajuda a manter a infraestrutura urbana "
-    "em condições de uso, e à ODS 9 (indústria, inovação e infraestrutura), porque barateia a inspeção das vias.",
+    "O CicloAlerta foi pensado para ciclistas e entregadores de bicicleta elétrica que usam as ciclovias e "
+    "ciclofaixas de São Paulo. Para quem pedala, um buraco ou um desnível é risco de queda, e na chuva a água esconde "
+    "o defeito justamente quando o piso já está escorregadio.",
+    "Os números mostram o tamanho do problema. A Auditoria Cidadã das Ciclovias e Ciclofaixas de SP, de 2025, "
+    "percorreu 715,3 dos 735,7 quilômetros da rede e classificou o pavimento de 20,5% dos trechos como precário, ruim "
+    "ou razoável (AUDITORIA CIDADÃ, 2025). Em texto do Jornal da USP, os sinistros com ciclistas em janeiro de 2026 "
+    "aparecem 15% acima de janeiro de 2024, segundo a Associação Brasileira do Setor de Bicicletas, e um professor de "
+    "engenharia de transportes da Poli-USP cita pistas escorregadias e buracos entre os problemas das ciclovias "
+    "(ECYCLE, 2026). Na cidade como um todo, a prefeitura recebeu quase 52 mil pedidos de tapa-buraco no primeiro "
+    "semestre de 2026, e 38% deles ainda estavam abertos no começo de agosto (BNEWS, 2026).",
+    "Hoje o conserto depende de alguém ver o defeito e abrir um pedido. O CicloAlerta junta os relatos dos ciclistas, "
+    "a previsão de chuva e a malha cicloviária em um mapa, e avisa quando a chuva deixa um trecho mais perigoso.",
+    "Este documento trata do componente de visão, que corresponde à disciplina de Applied Computer Vision. Ele tem dois "
+    "usos no produto. Na tela Reportar, confirma se a foto enviada mostra um buraco ou uma rachadura antes de o ponto ir "
+    "para o mapa. Em tempo real, analisa o vídeo de uma câmera comum e registra cada defeito que encontra.",
+    "O projeto se conecta à ODS 11 (cidades sustentáveis e transporte seguro), à ODS 3 (saúde, com menos sinistros de "
+    "trânsito) e à ODS 9 (infraestrutura).",
 ]
 
 FERRAMENTAS = [
@@ -246,12 +250,20 @@ FERRAMENTAS = [
     ),
     (
         "Apoio",
-        "Ultralytics 8.4 para treino e exportação, Google Colab com GPU T4, Flask para a API e pytest para os testes "
-        "automatizados do repositório.",
+        "Ultralytics 8.4 para treino e exportação, Google Colab com GPU T4, Flask para a API deste repositório, uma "
+        "rota pronta para o FastAPI do site e pytest para os testes automatizados.",
     ),
 ]
 
 METODOLOGIA = [
+    (
+        "Procurar imagens de ciclovias",
+        "Antes de escolher a base, procuramos fotos anotadas de ciclovias. A única base pública que encontramos, a Bike "
+        "Lane Damage Detection (BLDD), tem 370 fotos de ciclovias da região metropolitana de Barcelona, com as mesmas "
+        "categorias do RDD2022, mas o repositório publica só as anotações, sem as imagens e sem licença (PRATS, 2021). "
+        "Por isso treinamos com fotos de ruas, cujo asfalto é o mesmo de muitas ciclofaixas pintadas no leito da via, e "
+        "tratamos a falta de fotos de ciclovia como limitação.",
+    ),
     (
         "Definir as classes",
         "D00, D10 e D20 descrevem o formato da trinca. Na triagem inicial, o que pesa é separar trinca de buraco, que "
@@ -270,8 +282,8 @@ METODOLOGIA = [
     ),
     (
         "Escolher os países",
-        "Usamos Índia, Japão e República Tcheca, onde as imagens vêm de celulares presos a carros, como no uso previsto "
-        "(ARYA et al., 2022). Ficaram de fora a Noruega, que usa câmeras especiais, os Estados Unidos, com imagens do "
+        "Usamos Índia, Japão e República Tcheca, onde as imagens vêm de celulares comuns presos a carros (ARYA et al., "
+        "2022), o mais perto da câmera de um celular que a base oferece. Ficaram de fora a Noruega, que usa câmeras especiais, os Estados Unidos, com imagens do "
         "Street View, e a China, com moto e drone.",
     ),
     (
@@ -305,6 +317,28 @@ METODOLOGIA = [
         "modelo pode ir bem na média e mal em um lugar específico.",
     ),
     (
+        "Medir fotos tiradas de perto",
+        "A tela Reportar recebe fotos de alguém em pé ao lado do buraco, enquanto o modelo aprendeu com câmera de carro. "
+        "Para estimar o efeito, recortamos um quadrado em volta de cada defeito marcado nas 60 amostras do teste, com "
+        "lado de 4 e de 2,5 vezes o lado maior da caixa, e contamos quantos o modelo ainda encontrava, na mesma classe e "
+        "com IoU de pelo menos 0,3. O script é ferramentas/testar_fotos_aproximadas.py.",
+    ),
+    (
+        "Medir em fotos de celular com e sem água",
+        "Para medir o cenário de chuva, rodamos o modelo nas 713 fotos de celular da base de Kent, com 1.153 buracos "
+        "marcados no Reino Unido, muitos cheios de água (DIB; SIRLANTZIS; HOWELLS, 2023). O modelo nunca viu essas "
+        "fotos. Separamos à mão as 200 fotos da partição de teste em com água e secas, deixando de fora três em que não "
+        "dava para decidir, e medimos cada grupo com o aplicativo final. O script é ferramentas/testar_kent.py.",
+    ),
+    (
+        "Testar numa ciclovia de São Paulo",
+        "A equipe gravou ciclovias de São Paulo com o celular preso ao guidão de uma bicicleta elétrica. Escolhemos o "
+        "trecho mais estável, de 39 segundos, e o convertemos de 60 para 15 quadros por segundo, que é o ritmo em que o "
+        "detector roda na CPU. O guidão aparece no terço de baixo da imagem e virava buraco, então criamos a opção "
+        "--ignorar-base, que descarta essa faixa. A foto de um trecho com pintura trincada, tirada no mesmo lugar, "
+        "passou pela rota da tela Reportar. Sem marcação humana, esse teste é qualitativo.",
+    ),
+    (
         "Exportar e conferir",
         "Exportamos para ONNX e comparamos, em 100 imagens do teste, as caixas do PyTorch com as do aplicativo final.",
     ),
@@ -317,27 +351,38 @@ METODOLOGIA = [
     ),
     (
         "Integrar e proteger os dados",
-        "Cada defeito confirmado vira uma linha em ocorrencias.jsonl, e uma API HTTP atende quem preferir enviar "
-        "imagens. As ocorrências nascem com status pendente_revisao, porque o modelo sugere e uma pessoa decide. Para "
-        "seguir a LGPD, guardamos só o recorte do defeito, nunca o quadro inteiro, e a API descarta a imagem depois de "
-        "responder. A localização é opcional.",
+        "A rota POST /api/detectar atende a tela Reportar: recebe a foto e devolve as detecções já filtradas pelos "
+        "limiares calibrados, com uma severidade sugerida pelo tamanho da caixa, regra provisória que a revisão humana "
+        "confirma. No tempo real, cada defeito confirmado vira uma linha em ocorrencias.jsonl. Tudo nasce com status "
+        "pendente_revisao, porque o modelo sugere e uma pessoa decide. Para seguir a LGPD, a API processa a foto em "
+        "memória e não grava nada, o tempo real guarda só o recorte do defeito, e a localização registra o ponto do "
+        "buraco, nunca o trajeto de quem pedala. Se o site guardar a foto, ele apaga os metadados (EXIF) antes.",
     ),
 ]
 
 REFERENCIAS = [
     "ARYA, D. et al. RDD2022: a multi-national image dataset for automatic road damage detection. arXiv:2209.08538, "
     "2022. Disponível em: https://arxiv.org/abs/2209.08538.",
+    "AUDITORIA CIDADÃ das ciclovias e ciclofaixas de SP 2025. Apresentação publicada pela Prefeitura de São Paulo. "
+    "Disponível em: https://prefeitura.sp.gov.br/documents/d/mobilidade/auditoria_cidada_das_ciclovias_e_ciclofaixas_"
+    "de_sp_2025_ctb-pdf.",
     "BNEWS. Mesmo após recapeamento, SP registra quase 52 mil pedidos de tapa-buraco. 9 ago. 2026. Disponível em: "
     "https://www.bnewssaopaulo.com.br/noticias/politica/mesmo-apos-recapeamento-sp-registra-quase-52-mil-pedidos-de-"
     "tapa-buraco.html.",
     "DATASET NINJA. RDD2022. Disponível em: https://datasetninja.com/road-damage-detector.",
+    "DIB, J.; SIRLANTZIS, K.; HOWELLS, G. An annotated water-filled, and dry potholes dataset for deep learning "
+    "applications. Data in Brief, v. 48, art. 109206, 2023. DOI: 10.1016/j.dib.2023.109206. Dados em: "
+    "https://data.mendeley.com/datasets/tp95cdvgm8/1.",
     "DRONEFREAK. RDD2022 Multi-National Road Damage Detection Dataset (4-Class YOLO Export). Hugging Face. Revisão "
     "72b01f94. Disponível em: https://huggingface.co/datasets/dronefreak/RDD2022.",
+    "ECYCLE. Aumento no número de sinistros com ciclistas em SP escancara problemas estruturais das ciclovias. Texto do "
+    "Jornal da USP. 6 abr. 2026. Disponível em: https://www.ecycle.com.br/aumento-no-numero-de-sinistros-com-"
+    "ciclistas-em-sp-escancara-problemas-estruturais-das-ciclovias/.",
     "EDWRDC. RDD2022. Hugging Face. Revisão d8967222. Disponível em: https://huggingface.co/datasets/edwrdc/RDD2022.",
     "ONU. Objetivos de Desenvolvimento Sustentável. Disponível em: https://brasil.un.org/pt-br/sdgs.",
-    "PORTAL DO TRÂNSITO. Qualidade das rodovias brasileiras melhorou em 2025, diz CNT. 21 dez. 2025. Disponível em: "
-    "https://www.portaldotransito.com.br/noticias/mobilidade-e-tecnologia/seguranca/qualidade-das-rodovias-"
-    "brasileiras-melhorou-em-2025-diz-cnt/.",
+    "PRATS, J. Micromobility safety applications using AI. Trabalho de conclusão de curso, Universitat Politècnica de "
+    "Catalunya, 2021. Disponível em: https://core.ac.uk/download/491494203.pdf. Anotações em: "
+    "https://github.com/JaumePrats/BikeLaneDamageDetection.",
     "ULTRALYTICS. Ultralytics YOLO11. 2026. Disponível em: https://docs.ultralytics.com/models/yolo11/.",
 ]
 
@@ -494,6 +539,10 @@ def secao_resultados(d: Dados) -> list:
                 num(1000 / d.local["latencia_media_ms"], 1),
             ]
         )
+    arquivo_equipe = d.raiz / "docs" / "medicoes_equipe.json"
+    if arquivo_equipe.exists():
+        equipe = json.loads(arquivo_equipe.read_text(encoding="utf-8"))
+        linhas.append([equipe["descricao"], f"{num(equipe['latencia_media_ms'], 1)} ms", num(equipe["fps_medio"], 1)])
     corpo += [tabela(linhas, [8, 3.6, 3.6]), Paragraph("Tabela 4. Velocidade medida, incluindo preparo do quadro e NMS nas linhas de CPU.", E_LEGENDA)]
     if onnx.get("concordancia_com_pytorch") is not None:
         corpo.append(
@@ -518,14 +567,144 @@ def secao_resultados(d: Dados) -> list:
     if erros.exists():
         corpo += figura(erros, 15.4, f"Figura 4. Exemplos de erros no teste. {credito}")
 
+    aproximado = d.pasta / "teste_aproximado.json"
+    if aproximado.exists():
+        r = json.loads(aproximado.read_text(encoding="utf-8"))["resultados"]
+        corpo.append(Paragraph("Fotos tiradas de perto", E_H2))
+        linhas = [["Defeitos encontrados", "Foto inteira", "Recorte médio", "Recorte de perto"]]
+        for classe in ("buraco", "rachadura"):
+            total = r["foto_inteira"][classe]["total"]
+            linhas.append(
+                [f"{classe.capitalize()} ({total} marcados)"]
+                + [str(r[nivel][classe]["encontrados"]) for nivel in ("foto_inteira", "recorte_medio", "recorte_perto")]
+            )
+        b = {nivel: r[nivel]["buraco"]["encontrados"] for nivel in r}
+        corpo += [
+            tabela(linhas, [5.2, 3.2, 3.4, 3.6]),
+            Paragraph(
+                "Tabela 5. Defeitos encontrados nas 60 amostras do teste, na foto inteira e em recortes com lado de 4 "
+                "(médio) e 2,5 (de perto) vezes o lado maior da caixa.",
+                E_LEGENDA,
+            ),
+            Paragraph(
+                f"Quanto mais perto, menos defeitos o modelo encontra: nos buracos, foram {b['foto_inteira']} na foto "
+                f"inteira e {b['recorte_perto']} no recorte de perto. O recorte ampliado fica mais borrado que uma foto "
+                "real, então a queda real deve ser menor. Mesmo assim, o resultado define uma regra do produto: quando o "
+                "modelo não encontra nada, o site deixa o ciclista enviar o relato do mesmo jeito.",
+                E_CORPO,
+            ),
+        ]
+
+    kent = d.pasta / "teste_kent.json"
+    if kent.exists():
+        g = json.loads(kent.read_text(encoding="utf-8"))["grupos"]
+        corpo.append(Paragraph("Fotos de celular com e sem água", E_H2))
+        linhas = [["Fotos de Kent", "Fotos", "Buracos", "AP50", "Revocação no limiar", "Fotos em que aponta buraco"]]
+        for chave, nome in (("teste_seco", "Teste, secas"), ("teste_com_agua", "Teste, com água"), ("todas_as_fotos", "Todas as 713")):
+            linha = g[chave]
+            linhas.append([
+                nome, inteiro(linha["fotos"]), inteiro(linha["buracos_marcados"]), num(linha["ap50"], 2),
+                num(linha["revocacao_no_limiar"], 2), f"{num(linha['fotos_em_que_aponta_buraco'] * 100, 0)}%",
+            ])
+        seco, agua = g["teste_seco"], g["teste_com_agua"]
+        corpo += [
+            tabela(linhas, [3.6, 1.7, 2.0, 1.7, 3.0, 3.6]),
+            Paragraph("Tabela 6. Modelo atual nas fotos de celular da base de Kent, classe buraco, IoU de 0,5.", E_LEGENDA),
+            Paragraph(
+                f"Com água, o modelo acha menos buracos: o AP50 cai de {num(seco['ap50'], 2)} para {num(agua['ap50'], 2)}, e a "
+                f"parte das fotos em que ele aponta ao menos um buraco cai de {num(seco['fotos_em_que_aponta_buraco'] * 100, 0)}% "
+                f"para {num(agua['fotos_em_que_aponta_buraco'] * 100, 0)}%. Os buracos grandes cheios de água, fotografados "
+                "de perto, são os que ele mais perde, como mostra a Figura 5. O resultado confirma o problema que o "
+                "CicloAlerta quer tratar e aponta o próximo treino. Parte das caixas dessa base está deslocada em relação "
+                "ao buraco, então esses números tendem a subestimar o modelo.",
+                E_CORPO,
+            ),
+        ]
+        figura_kent = d.pasta / "exemplos" / "kent_agua.jpg"
+        if figura_kent.exists():
+            corpo += figura(
+                figura_kent,
+                15.4,
+                "Figura 5. Buracos com água na base de Kent. Em cima, buracos que o modelo encontrou. Embaixo, buracos "
+                "que ele perdeu. Verde: marcação da base. Vermelho: buraco previsto. Laranja: rachadura prevista. "
+                "Fotos: Dib, Sirlantzis e Howells (2023), CC BY 4.0.",
+            )
+
+    video = d.pasta / "exemplos" / "video_equipe.jpg"
+    if video.exists():
+        corpo.append(Paragraph("Vídeo de rua gravado pela equipe", E_H2))
+        corpo.append(
+            Paragraph(
+                "A equipe filmou 51 segundos de uma rua de São Paulo com o celular e rodou o detector sobre o vídeo, só "
+                "com CPU. Ele registrou 28 ocorrências, 23 rachaduras e 5 buracos. Parte delas eram acertos, como a "
+                "trinca em couro de jacaré da Figura 6. Outras eram marcas de pneu, faixas pintadas e uma tampa de "
+                "bueiro, o que confirma a necessidade da revisão humana.",
+                E_CORPO,
+            )
+        )
+        corpo += figura(
+            video,
+            12.5,
+            "Figura 6. Quadros do vídeo da equipe com o detector rodando. À esquerda, trinca em couro de jacaré marcada "
+            "como rachadura (0,57). À direita, marcas de pneu confundidas com rachadura.",
+        )
+
+    ciclo = d.pasta / "teste_ciclovia.json"
+    figura_ciclo = d.pasta / "exemplos" / "ciclovia.jpg"
+    if ciclo.exists() and figura_ciclo.exists():
+        c = json.loads(ciclo.read_text(encoding="utf-8"))
+        corpo.append(Paragraph("Teste numa ciclovia de São Paulo", E_H2))
+        corpo.append(
+            Paragraph(
+                f"No vídeo da ciclovia, o detector rodou a {num(c['fps_medio_cpu_2_nucleos'], 1)} quadros por segundo e "
+                f"registrou {c['ocorrencias_com_ignorar_base']['rachadura']} rachaduras. A pintura trincada da ciclovia "
+                f"foi marcada com confiança de até {num(c['maior_confianca_rachadura'], 2)}, o melhor acerto em imagens de "
+                "São Paulo. Muitas das outras ocorrências são linhas que cruzam a ciclovia e podem ser trincas ou juntas "
+                "do piso; só a revisão humana separa as duas. Sem a opção --ignorar-base, o guidão chegou a ser marcado "
+                f"como buraco ({num(c['guidao_como_buraco_confianca'], 2)}). Na foto do trecho trincado, a rota da tela "
+                "Reportar respondeu que há defeito, com uma rachadura na pintura e um buraco onde ela descascou.",
+                E_CORPO,
+            )
+        )
+        if "nao_registrados" in c and "teste_limiar_buraco" in c:
+            borda, vao = c["nao_registrados"][:2]
+            lim = c["teste_limiar_buraco"]
+            outros = lim["buracos_registrados_em_outros_4_videos_da_equipe"]
+            corpo.append(
+                Paragraph(
+                    "Dois defeitos ficaram sem registro. Uma borda quebrada entre a faixa e o concreto foi marcada como "
+                    f"buraco com até {num(borda['maior_confianca_buraco'], 2)}, mas em só "
+                    f"{borda['quadros_acima_do_limiar']} quadros, e o detector exige 3. O vão de uma travessia não "
+                    f"passou de {num(vao['maior_confianca_buraco'], 2)}. São degraus e emendas de ciclovia, diferentes "
+                    "dos buracos de asfalto da RDD2022. Baixar o limiar de buraco para "
+                    f"{num(lim['limiar_testado'], 2)} registrou a borda, mas também o guidão e o painel da bicicleta, e "
+                    f"mais que dobrou os buracos registrados em outros quatro vídeos da equipe (de {outros['0.277']} para "
+                    f"{outros['0.15']}), que quase não mostram buracos reais. Mantivemos o limiar calibrado.",
+                    E_CORPO,
+                )
+            )
+        corpo += figura(
+            figura_ciclo,
+            15.4,
+            "Figura 7. Ciclovia de São Paulo gravada pela equipe. À esquerda, pintura trincada marcada como rachadura "
+            "(0,75). No meio, a foto do mesmo trecho enviada à rota da tela Reportar. À direita, o guidão marcado como "
+            "buraco, erro que a opção --ignorar-base resolve.",
+        )
+
     arquivo = d.pasta / "exemplo_saida" / "ocorrencias.jsonl"
     if arquivo.exists() and arquivo.stat().st_size:
         primeira = json.loads(arquivo.read_text(encoding="utf-8").splitlines()[0])
-        corpo.append(Paragraph("Ocorrência gerada", E_H2))
-        corpo.append(Paragraph("Este é o dado que os outros componentes do MVP recebem:", E_CORPO))
         texto = json.dumps(primeira, ensure_ascii=False, indent=2)
         texto = re.sub(r"\[\s+([^\]]+?)\s+\]", lambda c: "[" + " ".join(c[1].split()) + "]", texto)
-        corpo.append(Preformatted(texto, E_CODIGO))
+        corpo.append(
+            KeepTogether(
+                [
+                    Paragraph("Ocorrência gerada", E_H2),
+                    Paragraph("Este é o dado que os outros componentes do MVP recebem:", E_CORPO),
+                    Preformatted(texto, E_CODIGO),
+                ]
+            )
+        )
     return corpo
 
 
@@ -543,6 +722,34 @@ def leitura_das_classes(d: Dados) -> str:
     return texto + "Mesmo priorizando imagens com buraco, essa classe ficou atrás, o que pede mais exemplos dela no próximo treino."
 
 
+def limites(d: Dados) -> str:
+    texto = (
+        "O limite mais sério é a distância entre os dados de treino e o uso real. A base não tem ciclovias nem ruas "
+        "brasileiras. No vídeo de ciclovia gravado pela equipe, o modelo marcou a pintura trincada, mas também linhas "
+        "do piso que podem ser só juntas, e não registrou degraus e emendas quebradas, que não existem na base. Esse "
+        "teste ainda não tem marcação humana para virar número. "
+    )
+    kent = d.pasta / "teste_kent.json"
+    if kent.exists():
+        g = json.loads(kent.read_text(encoding="utf-8"))["grupos"]
+        texto += (
+            f"Em fotos de celular com água, justamente o cenário que o CicloAlerta destaca, o AP50 de buraco caiu de "
+            f"{num(g['teste_seco']['ap50'], 2)} para {num(g['teste_com_agua']['ap50'], 2)}. "
+        )
+    aproximado = d.pasta / "teste_aproximado.json"
+    if aproximado.exists():
+        r = json.loads(aproximado.read_text(encoding="utf-8"))["resultados"]
+        texto += (
+            f"Em recortes que imitam fotos de perto, os buracos encontrados caíram de {r['foto_inteira']['buraco']['encontrados']} "
+            f"para {r['recorte_perto']['buraco']['encontrados']} em {r['foto_inteira']['buraco']['total']}. "
+        )
+    return texto + (
+        "O próximo passo é um ajuste fino com fotos de celular de buracos com água. Ele não coube no prazo porque o "
+        "Colab ficou sem GPU disponível. Depois, o próprio produto ajuda: as fotos que chegam pela tela Reportar, já "
+        "revisadas, formam uma base de ciclovias paulistanas, com piso seco e molhado."
+    )
+
+
 def conclusao(d: Dados) -> list[str]:
     if d.m:
         classes = d.m["teste"]["por_classe"]
@@ -552,7 +759,7 @@ def conclusao(d: Dados) -> list[str]:
             f"vídeo. O desempenho é moderado. No limiar calibrado, o modelo acha "
             f"{num(classes['buraco']['revocacao_no_limiar'] * 100, 0)}% dos buracos e "
             f"{num(classes['rachadura']['revocacao_no_limiar'] * 100, 0)}% das rachaduras em uma imagem isolada. Isso "
-            "serve para triagem com revisão humana, e não para substituir a inspeção da via. Em vídeo, o mesmo defeito "
+            "serve para triagem com revisão humana, e não para substituir a vistoria da ciclovia. Em vídeo, o mesmo defeito "
             "aparece em vários quadros e o modelo tem mais de uma chance, mas não medimos esse ganho."
         )
     else:
@@ -560,11 +767,10 @@ def conclusao(d: Dados) -> list[str]:
     return [
         abertura,
         leitura_das_classes(d),
-        "O limite mais sério é a origem das imagens. A base não tem ruas brasileiras, e as condições de asfalto, luz e "
-        "tráfego são outras. O próximo passo é coletar imagens em São Paulo, medir o modelo nelas e usá-las em um novo "
-        "ajuste fino. O rastreador também tem limite: em velocidade alta, a sobreposição entre quadros cai e o mesmo "
-        "defeito pode ser contado duas vezes. Por isso a contagem é uma aproximação, e cada ocorrência passa por revisão "
-        "humana antes de virar chamado.",
+        limites(d),
+        "O rastreador também tem limite: em velocidade alta, a sobreposição entre quadros cai e o mesmo defeito pode ser "
+        "contado duas vezes. Por isso a contagem é uma aproximação, e cada ocorrência passa por revisão humana antes de "
+        "virar alerta no mapa.",
     ]
 
 
@@ -574,7 +780,7 @@ def rodape(canvas, documento) -> None:
     canvas.saveState()
     canvas.setFont(NORMAL, 9)
     canvas.setFillColor(COR_SUAVE)
-    canvas.drawString(2.5 * cm, 1.4 * cm, "Via Atenta · Applied Computer Vision · FIAP")
+    canvas.drawString(2.5 * cm, 1.4 * cm, "CicloAlerta · Applied Computer Vision · FIAP")
     canvas.drawRightString(A4[0] - 2.5 * cm, 1.4 * cm, str(documento.page))
     canvas.restoreState()
 
@@ -585,8 +791,8 @@ def capa(d: Dados) -> list:
         Paragraph("FIAP · Engenharia de Software · 4º ano", E_C_MARCA),
         Paragraph("Global Solution 2026.2: CitizenTech", E_C_SUB),
         Spacer(1, 1.8 * cm),
-        Paragraph("Via Atenta", E_C_TITULO),
-        Paragraph("Detecção de buracos e rachaduras em tempo real com YOLO11", E_C_SUB),
+        Paragraph("CicloAlerta", E_C_TITULO),
+        Paragraph("Detecção de buracos e rachaduras nas ciclovias de São Paulo com YOLO11", E_C_SUB),
         Spacer(1, 1.8 * cm),
         Paragraph("Applied Computer Vision · Enxergando o mundo real", E_C_SUB),
         Paragraph("Professores Arnaldo Viana e Paulo Rodrigues", E_C_SUB),
@@ -646,8 +852,8 @@ def montar(raiz: Path, saida: Path) -> dict:
         rightMargin=2.5 * cm,
         topMargin=2.2 * cm,
         bottomMargin=2.2 * cm,
-        title="Via Atenta: detecção de buracos e rachaduras em tempo real",
-        author="Equipe Via Atenta",
+        title="CicloAlerta: detecção de buracos e rachaduras nas ciclovias",
+        author="Equipe CicloAlerta",
         subject="FIAP Global Solution 2026.2, Applied Computer Vision",
     ).build(corpo, onFirstPage=rodape, onLaterPages=rodape)
     return {"resumo": palavras_resumo, "objetivo": palavras_objetivo, "rascunho": not d.tem_resultados}
@@ -665,7 +871,7 @@ def main() -> int:
     analisador.add_argument("--raiz", type=Path, default=RAIZ)
     analisador.add_argument("--saida", type=Path, default=None)
     args = analisador.parse_args()
-    saida = args.saida or args.raiz / "docs" / "relatorio_via_atenta.pdf"
+    saida = args.saida or args.raiz / "docs" / "relatorio_cicloalerta.pdf"
     print(json.dumps(montar(args.raiz, saida), ensure_ascii=False))
     return 0
 

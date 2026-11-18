@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from tests.conftest import criar_amostra, escrever_xml
-from via_atenta.preparar_dados import (
+from cicloalerta.preparar_dados import (
     PARTICOES,
     bloco_da_imagem,
     ler_anotacao,

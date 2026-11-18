@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import cv2
 
-from via_atenta.detector import Ajuste, DetectorONNX, decodificar, letterbox, nms
+from cicloalerta.detector import Ajuste, DetectorONNX, decodificar, letterbox, nms
 
 NOMES = {0: "buraco", 1: "rachadura"}
 LIMIARES = np.array([0.3, 0.3], dtype=np.float32)
@@ -115,7 +115,7 @@ def _rotulos_em_pixels(caminho, largura, altura):
 
 def test_modelo_real_acha_os_objetos_rotulados(modelo_real, coco128):
     """Confere decodificação e escala com um YOLO11 exportado de verdade, em imagens de vários formatos."""
-    from via_atenta.rastreador import iou
+    from cicloalerta.rastreador import iou
 
     detector = DetectorONNX(modelo_real, limiar_padrao=0.25)
     achados = esperados = 0

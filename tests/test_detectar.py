@@ -5,8 +5,16 @@ import json
 import cv2
 import numpy as np
 
-from via_atenta.detectar import LeitorAoVivo, desenhar, eh_fonte_de_imagens, filtrar_regiao, main, rotular_fonte
-from via_atenta.detector import Deteccao
+from cicloalerta.detectar import (
+    LeitorAoVivo,
+    desenhar,
+    deve_sair,
+    eh_fonte_de_imagens,
+    filtrar_regiao,
+    main,
+    rotular_fonte,
+)
+from cicloalerta.detector import Deteccao
 
 
 def deteccao(y1, y2):
@@ -17,6 +25,12 @@ def test_filtra_o_topo_do_quadro():
     em_cima, embaixo = deteccao(0, 40), deteccao(500, 600)
     assert filtrar_regiao([em_cima, embaixo], 720, 0.25) == [embaixo]
     assert filtrar_regiao([em_cima, embaixo], 720, 0.0) == [em_cima, embaixo]
+
+
+def test_filtra_a_base_do_quadro_onde_fica_o_guidao():
+    em_cima, meio, guidao = deteccao(0, 40), deteccao(300, 400), deteccao(650, 720)
+    assert filtrar_regiao([em_cima, meio, guidao], 720, 0.0, 0.3) == [em_cima, meio]
+    assert filtrar_regiao([em_cima, meio, guidao], 720, 0.25, 0.3) == [meio]
 
 
 def test_identifica_tipo_de_fonte(tmp_path):
@@ -32,6 +46,22 @@ def test_rotulo_da_fonte_nao_expoe_caminho_nem_senha():
     assert rotular_fonte("/home/breno/videos/rua.mp4") == "rua.mp4"
     assert rotular_fonte("C:/Users/breno/rua.mp4") == "rua.mp4"
     assert rotular_fonte("rtsp://usuario:senha@192.168.0.10:554/stream") == "192.168.0.10"
+
+
+def test_sai_com_q_maiusculo_minusculo_e_esc():
+    assert deve_sair(ord("q"), 1.0)
+    assert deve_sair(ord("Q"), 1.0)
+    assert deve_sair(27, 1.0)
+
+
+def test_sai_quando_a_janela_e_fechada_no_x():
+    assert deve_sair(-1, 0.0)
+    assert deve_sair(-1, -1.0)
+
+
+def test_continua_sem_tecla_e_com_janela_aberta():
+    assert not deve_sair(-1, 1.0)
+    assert not deve_sair(ord("a"), 1.0)
 
 
 def test_desenhar_nao_altera_o_original():

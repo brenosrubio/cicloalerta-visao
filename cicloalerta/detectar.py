@@ -1,10 +1,10 @@
 """Detecção em tempo real por webcam, celular, vídeo, imagem ou pasta de imagens.
 
 Exemplos:
-    python -m via_atenta.detectar --fonte 0
-    python -m via_atenta.detectar --fonte http://192.168.0.10:8080/video
-    python -m via_atenta.detectar --fonte rua.mp4 --salvar-video
-    python -m via_atenta.detectar --fonte fotos/
+    python -m cicloalerta.detectar --fonte 0
+    python -m cicloalerta.detectar --fonte http://192.168.0.10:8080/video
+    python -m cicloalerta.detectar --fonte rua.mp4 --salvar-video
+    python -m cicloalerta.detectar --fonte fotos/
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ from .ocorrencias import RegistroOcorrencias
 from .rastreador import RastreadorIoU
 
 EXTENSOES_IMAGEM = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-TITULO_JANELA = "Via Atenta (Q para sair)"
+TITULO_JANELA = "CicloAlerta (Q para sair)"
 TECLAS_DE_SAIDA = {ord("q"), ord("Q"), 27}  # 27 é o Esc
 CORES = {"buraco": (40, 40, 235), "rachadura": (0, 170, 255)}
 COR_PADRAO = (0, 220, 120)
@@ -103,12 +103,15 @@ def eh_fonte_de_imagens(fonte: str) -> bool:
     return caminho.is_dir() or caminho.suffix.lower() in EXTENSOES_IMAGEM
 
 
-def filtrar_regiao(deteccoes: list[Deteccao], altura: int, ignorar_topo: float) -> list[Deteccao]:
-    """Descarta o que está no topo do quadro, onde costuma haver céu e fachadas."""
-    if ignorar_topo <= 0:
+def filtrar_regiao(
+    deteccoes: list[Deteccao], altura: int, ignorar_topo: float, ignorar_base: float = 0.0
+) -> list[Deteccao]:
+    """Descarta o topo do quadro (céu e fachadas) e a base (guidão da bicicleta ou capô)."""
+    if ignorar_topo <= 0 and ignorar_base <= 0:
         return deteccoes
-    corte = altura * ignorar_topo
-    return [d for d in deteccoes if (d.caixa[1] + d.caixa[3]) / 2 >= corte]
+    topo = altura * max(0.0, ignorar_topo)
+    base = altura * (1 - max(0.0, ignorar_base))
+    return [d for d in deteccoes if topo <= (d.caixa[1] + d.caixa[3]) / 2 <= base]
 
 
 def deve_sair(tecla: int, janela_visivel: float) -> bool:
@@ -164,7 +167,7 @@ def processar_imagens(detector: DetectorONNX, args: argparse.Namespace, registro
             print(f"Ignorando arquivo ilegível: {caminho}", file=sys.stderr)
             continue
         t0 = time.perf_counter()
-        deteccoes = filtrar_regiao(detector.detectar(quadro), quadro.shape[0], args.ignorar_topo)
+        deteccoes = filtrar_regiao(detector.detectar(quadro), quadro.shape[0], args.ignorar_topo, args.ignorar_base)
         latencias.append((time.perf_counter() - t0) * 1000)
         rastreador = RastreadorIoU(min_quadros=1)
         _, confirmados = rastreador.atualizar(deteccoes, 0)
@@ -195,7 +198,7 @@ def processar_fluxo(detector: DetectorONNX, args: argparse.Namespace, registro: 
     try:
         for indice, quadro in enumerate(quadros):
             t0 = time.perf_counter()
-            deteccoes = filtrar_regiao(detector.detectar(quadro), quadro.shape[0], args.ignorar_topo)
+            deteccoes = filtrar_regiao(detector.detectar(quadro), quadro.shape[0], args.ignorar_topo, args.ignorar_base)
             visiveis, confirmados = rastreador.atualizar(deteccoes, indice)
             for rastro in confirmados:
                 registro.registrar(rastro, quadro)
@@ -237,12 +240,15 @@ def processar_fluxo(detector: DetectorONNX, args: argparse.Namespace, registro: 
 def criar_analisador() -> argparse.ArgumentParser:
     analisador = argparse.ArgumentParser(description="Detecta buracos e rachaduras em tempo real.")
     analisador.add_argument("--fonte", default="0", help="câmera (0), URL, vídeo, imagem ou pasta")
-    analisador.add_argument("--modelo", type=Path, default=Path("modelos/via_atenta.onnx"))
+    analisador.add_argument("--modelo", type=Path, default=Path("modelos/cicloalerta.onnx"))
     analisador.add_argument("--saida", type=Path, default=Path("saida"))
     analisador.add_argument("--conf", type=float, default=None, help="troca os limiares calibrados por um valor único")
     analisador.add_argument("--min-quadros", type=int, default=3, help="quadros para confirmar um defeito")
     analisador.add_argument("--max-perdidos", type=int, default=8, help="quadros até esquecer um defeito")
     analisador.add_argument("--ignorar-topo", type=float, default=0.0, help="fração superior do quadro a ignorar")
+    analisador.add_argument(
+        "--ignorar-base", type=float, default=0.0, help="fração inferior do quadro a ignorar (guidão ou capô)"
+    )
     analisador.add_argument("--latitude", type=float, default=None, help="ponto informado pelo usuário")
     analisador.add_argument("--longitude", type=float, default=None, help="ponto informado pelo usuário")
     analisador.add_argument("--salvar-video", action="store_true", help="grava o vídeo anotado, com o quadro inteiro")

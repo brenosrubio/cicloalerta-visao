@@ -1,5 +1,5 @@
 [project]
-name = "via-atenta-visao"
+name = "cicloalerta-visao"
 version = "1.0.0"
 description = "Detecção de buracos e rachaduras em tempo real com YOLO11 treinado sobre o RDD2022"
 requires-python = ">=3.10"
